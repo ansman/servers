@@ -14,6 +14,9 @@ server = http.createServer (req, resp) ->
 
   req.on('data', console.log)
 
+  resp.setHeader('Access-Control-Allow-Origin', '*')
+  resp.setHeader('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS')
+  resp.setHeader('Access-Control-Allow-Headers', 'accept, cache-control, origin, x-requested-with, x-file-name, content-type')
   resp.writeHead(200)
   resp.end()
 
