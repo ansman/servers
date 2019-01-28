@@ -20,16 +20,18 @@ public class Server {
       server = new ServerSocket(port, 0, InetAddress.getByName(host));
 
       System.err.println("Server listening on " + host + ":" + port + "\n");
+      int read;
+      byte[] buffer = new byte[8192];
 
       while(true) {
         Socket client = server.accept();
+        System.out.println("Connection accepted from " + client.getRemoteSocketAddress());
         PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-        BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+        InputStream in = client.getInputStream();
 
-        String input;
-
-        while(!(input = in.readLine()).equals(""))
-          System.out.println(input);
+        while((read = in.read(buffer)) > 0) {
+          System.out.write(buffer, 0, read);
+        }
 
         System.out.println("");
 
