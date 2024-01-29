@@ -2,8 +2,8 @@
 
 require 'socket'
 
-host = ARGV[2] || '127.0.0.1'
-port = (ARGV[1] || 8080).to_i
+host = ARGV[1] || '127.0.0.1'
+port = (ARGV[0] || 8080).to_i
 
 server = TCPServer.new(host, port)
 
