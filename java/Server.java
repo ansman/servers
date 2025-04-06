@@ -1,5 +1,9 @@
 // javac Server.java && java Server [port=8080] [host=127.0.0.1]
 
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
+
 import java.net.*;
 import java.io.*;
 
@@ -14,37 +18,35 @@ public class Server {
     if(argv.length >= 1)
       port = Short.parseShort(argv[0]);
 
-    ServerSocket server = null;
+    HttpServer server = HttpServer.create(new InetSocketAddress(host, port), 0);
+    server.createContext("/", new Handler());
+    server.setExecutor(null);
+    server.start();
+    System.out.println("Server listening on " + host + ":" + port);
+    System.out.println();
+  }
 
-    try {
-      server = new ServerSocket(port, 0, InetAddress.getByName(host));
+  private static class Handler implements HttpHandler {
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+      System.out.print(exchange.getRequestMethod());
+      System.out.print(" ");
+      System.out.print(exchange.getRequestURI());
+      System.out.print(" ");
+      System.out.print(exchange.getProtocol());
+      System.out.println();
 
-      System.err.println("Server listening on " + host + ":" + port + "\n");
-      int read;
-      byte[] buffer = new byte[8192];
-
-      while(true) {
-        Socket client = server.accept();
-        System.out.println("Connection accepted from " + client.getRemoteSocketAddress());
-        PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-        InputStream in = client.getInputStream();
-
-        while((read = in.read(buffer)) > 0) {
-          System.out.write(buffer, 0, read);
-        }
-
-        System.out.println("");
-
-        out.write("HTTP/1.1 200 OK");
-        out.close();
-        in.close();
-        client.close();
-      }
-    }
-    finally {
-      System.out.println("Closing");
-      if(server != null)
-        server.close();
+      exchange.getRequestHeaders().forEach((k, vs) -> {
+        vs.forEach((v) -> {
+          System.out.print(k);
+          System.out.print(": ");
+          System.out.print(v);
+          System.out.println();
+        });
+      });
+      System.out.println();
+      exchange.sendResponseHeaders(200, 0);
+      exchange.close();
     }
   }
 }
